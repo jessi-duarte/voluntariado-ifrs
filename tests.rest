@@ -1,0 +1,110 @@
+### Login de administrador
+# Execute primeiro e use o token retornado nas requisições protegidas abaixo.
+# Confira localmente se o e-mail e a senha correspondem ao administrador criado no .env.
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@voluntariado.local",
+  "password": "SenhaForte123"
+}
+
+
+### Listar eventos
+GET http://localhost:3000/events
+
+
+### Consultar evento pelo ID
+GET http://localhost:3000/events/1
+
+
+### Cadastrar evento (administrador)
+# Substitua COLE_O_TOKEN_NOVO_AQUI pelo token retornado no login.
+POST http://localhost:3000/events
+Content-Type: application/json
+Authorization: Bearer COLE_O_TOKEN_NOVO_AQUI
+
+{
+  "title": "Evento de Teste Protegido",
+  "description": "Teste de autorização.",
+  "event_date": "2026-12-10T09:00:00",
+  "location": "Campus IFRS",
+  "max_volunteers": 10
+}
+
+
+### Atualizar evento pelo ID (administrador)
+PUT http://localhost:3000/events/1
+Content-Type: application/json
+Authorization: Bearer COLE_O_TOKEN_NOVO_AQUI
+
+{
+  "title": "Campanha de Doação de Sangue - Atualizada",
+  "description": "Campanha solidária de doação de sangue.",
+  "event_date": "2026-11-15T09:00:00",
+  "location": "Hemocentro Regional",
+  "max_volunteers": 35,
+  "status": "open"
+}
+
+
+### Excluir evento pelo ID (administrador)
+# Atenção: confirme que o ID 4 é um evento de teste antes de executar.
+DELETE http://localhost:3000/events/4
+Authorization: Bearer COLE_O_TOKEN_NOVO_AQUI
+
+
+### Listar voluntários
+GET http://localhost:3000/volunteers
+
+
+### Consultar voluntário pelo ID
+GET http://localhost:3000/volunteers/1
+
+
+### Cadastrar voluntário (administrador)
+POST http://localhost:3000/volunteers
+Content-Type: application/json
+Authorization: Bearer COLE_O_TOKEN_NOVO_AQUI
+
+{
+  "name": "Mariana Oliveira",
+  "email": "mariana.teste@example.com",
+  "phone": "54999990004"
+}
+
+
+### Atualizar voluntário pelo ID (administrador)
+# Atenção: confirme que o ID 4 é um voluntário de teste antes de executar.
+PUT http://localhost:3000/volunteers/4
+Content-Type: application/json
+Authorization: Bearer COLE_O_TOKEN_NOVO_AQUI
+
+{
+  "name": "Mariana Oliveira Atualizada",
+  "email": "mariana.atualizada@example.com",
+  "phone": "54999991111"
+}
+
+
+### Excluir voluntário de teste (administrador)
+# Atenção: confirme que o ID 4 é um voluntário de teste antes de executar.
+DELETE http://localhost:3000/volunteers/4
+Authorization: Bearer COLE_O_TOKEN_NOVO_AQUI
+
+
+### Teste de segurança: cadastro de evento sem token (deve falhar com 401)
+POST http://localhost:3000/events
+Content-Type: application/json
+
+{
+  "title": "Evento de Teste Sem Token",
+  "description": "Esta requisição deve ser bloqueada.",
+  "event_date": "2026-12-10T09:00:00",
+  "location": "Campus IFRS",
+  "max_volunteers": 10
+}
+
+### Dashboard protegido por JWT
+GET http://localhost:3000/dashboard
+Authorization: Bearer COLE_O_TOKEN_NOVO_AQUI
