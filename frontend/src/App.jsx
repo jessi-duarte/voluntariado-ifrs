@@ -10,6 +10,11 @@ const emptyForm = {
   location: '',
   max_volunteers: 20,
 };
+const emptyVolunteerForm = {
+  name: '',
+  email: '',
+  phone: '',
+};
 
 function formatDate(date) {
   if (!date) return 'Data não informada';
@@ -41,6 +46,10 @@ function App() {
   const [form, setForm] = useState(emptyForm);
   const [formMessage, setFormMessage] = useState('');
   const [saving, setSaving] = useState(false);
+
+  const [volunteerForm, setVolunteerForm] = useState(emptyVolunteerForm);
+  const [volunteerMessage, setVolunteerMessage] = useState('');
+  const [savingVolunteer, setSavingVolunteer] = useState(false);
 
   const [editingEvent, setEditingEvent] = useState(null);
   const [editForm, setEditForm] = useState({});
@@ -188,6 +197,60 @@ function App() {
       setFormMessage(err.message);
     } finally {
       setSaving(false);
+    }
+  }
+    function handleVolunteerChange(event) {
+    const { name, value } = event.target;
+
+    setVolunteerForm((current) => ({
+      ...current,
+      [name]: value,
+    }));
+  }
+
+  async function handleVolunteerSubmit(event) {
+    event.preventDefault();
+    setVolunteerMessage('');
+
+    if (!token || user?.role !== 'admin') {
+      setVolunteerMessage(
+        'Faça login como administrador para cadastrar voluntários.',
+      );
+      return;
+    }
+
+    setSavingVolunteer(true);
+
+    try {
+      const response = await fetch(`${API_URL}/volunteers`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(volunteerForm),
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (response.status === 401 || response.status === 403) {
+        setToken('');
+        setUser(null);
+        throw new Error(
+          data.message || 'Acesso negado. Faça login novamente.',
+        );
+      }
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Erro ao cadastrar voluntário.');
+      }
+
+      setVolunteerForm(emptyVolunteerForm);
+      setVolunteerMessage('Voluntário cadastrado com sucesso!');
+    } catch (error) {
+      setVolunteerMessage(error.message);
+    } finally {
+      setSavingVolunteer(false);
     }
   }
 
@@ -500,6 +563,71 @@ function App() {
                 disabled={saving}
               >
                 {saving ? 'Salvando...' : 'Cadastrar evento'}
+              </button>
+            </form>
+          </section>
+        )}
+                {user?.role === 'admin' && (
+          <section className="panel">
+            <div className="panel-heading">
+              <span className="eyebrow">ADMINISTRAÇÃO</span>
+              <h2>Cadastrar voluntário</h2>
+              <p>Cadastre as pessoas que desejam participar das ações.</p>
+            </div>
+
+            <form className="app-form" onSubmit={handleVolunteerSubmit}>
+              <label htmlFor="volunteer-name">Nome completo</label>
+              <input
+                id="volunteer-name"
+                name="name"
+                type="text"
+                value={volunteerForm.name}
+                onChange={handleVolunteerChange}
+                placeholder="Nome do voluntário"
+                required
+              />
+
+              <label htmlFor="volunteer-email">E-mail</label>
+              <input
+                id="volunteer-email"
+                name="email"
+                type="email"
+                value={volunteerForm.email}
+                onChange={handleVolunteerChange}
+                placeholder="email@exemplo.com"
+                required
+              />
+
+              <label htmlFor="volunteer-phone">Telefone</label>
+              <input
+                id="volunteer-phone"
+                name="phone"
+                type="tel"
+                value={volunteerForm.phone}
+                onChange={handleVolunteerChange}
+                placeholder="Telefone para contato"
+              />
+
+              {volunteerMessage && (
+                <p
+                  className={`form-message ${
+                    volunteerMessage.includes('sucesso')
+                      ? 'success'
+                      : 'error'
+                  }`}
+                >
+                  {volunteerMessage}
+                </p>
+              )}
+
+              <button
+                className="primary-button"
+                type="submit"
+                disabled={savingVolunteer}
+              >
+                {savingVolunteer
+                  ? 'Salvando...'
+                  : 'Cadastrar voluntário'}
               </button>
             </form>
           </section>
